@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useCallback, FormEvent } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -26,10 +26,12 @@ export default function RSVPForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
+
+  const showConditionalFields = formData.attendance === 'yes' || formData.attendance === 'maybe';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -117,7 +119,7 @@ export default function RSVPForm() {
       </div>
 
       {/* Conditional fields for "yes" or "maybe" */}
-      {(formData.attendance === 'yes' || formData.attendance === 'maybe') && (
+      {showConditionalFields && (
         <>
           {/* Number of guests */}
           <div>

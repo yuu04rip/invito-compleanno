@@ -2,6 +2,10 @@
 
 import { useEffect, useRef } from 'react';
 
+// Animation configuration
+const BALLOON_COUNT = 20;
+const CONFETTI_COUNT = 50;
+
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -38,8 +42,8 @@ export default function AnimatedBackground() {
       '#B4E7CE', // seafoam
     ];
 
-    // Create more balloons for a festive atmosphere
-    for (let i = 0; i < 20; i++) {
+    // Create balloons
+    for (let i = 0; i < BALLOON_COUNT; i++) {
       balloons.push({
         x: Math.random() * canvas.width,
         y: canvas.height + Math.random() * 300,
@@ -62,8 +66,8 @@ export default function AnimatedBackground() {
       shape: 'rect' | 'circle';
     }> = [];
 
-    // Create more confetti pieces
-    for (let i = 0; i < 50; i++) {
+    // Create confetti
+    for (let i = 0; i < CONFETTI_COUNT; i++) {
       confetti.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -188,8 +192,7 @@ export default function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 0, opacity: 0.6 }}
+      className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-60"
     />
   );
 }

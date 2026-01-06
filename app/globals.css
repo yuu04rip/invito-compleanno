@@ -144,18 +144,3 @@ body {
     padding: 16px 24px;
   }
 }
-
-/* Remove old unused styles */
-.event-tabs,
-.event-tab,
-.question-block,
-.question-header,
-.question-controls,
-.options-list,
-.option-item,
-.option-bullet,
-.option-text,
-.option-remove,
-.form-footer {
-  /* These are no longer needed */
-}
