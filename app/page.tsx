@@ -1,6 +1,6 @@
 import AnimatedBackground from '@/components/AnimatedBackground';
 import RSVPForm from '@/components/RSVPForm';
-
+import festeggiataImg from '@/app/images/festeggiata.jpeg';
 export default function Home() {
   return (
       <main className="min-h-screen gradient-bg relative overflow-hidden">
@@ -16,6 +16,15 @@ export default function Home() {
             <p className="text-xl md:text-2xl text-gray-700 font-medium">
               Vieni a festeggiare un compleanno speciale! 🎉
             </p>
+
+            {/* Foto della festeggiata */}
+            <div className="mt-6 flex justify-center">
+              <img
+                  src={festeggiataImg.src}
+                  alt="Foto della festeggiata"
+                  className="w-48 h-48 md:w-64 md:h-64 object-cover rounded-full border-4 border-pastel-pink shadow-lg"
+              />
+            </div>
           </div>
 
           {/* Event Details Card */}
