@@ -31,7 +31,7 @@ export default function Home() {
                   <span className="text-5xl">📅</span>
                   <div>
                     <p className="font-bold text-gray-800 text-lg">Data</p>
-                    <p className="text-gray-700">Mercoledi 6 gennaio 2026</p>
+                    <p className="text-gray-700">Mercoledi 7 gennaio 2026</p>
                   </div>
                 </div>
               </div>
@@ -42,7 +42,7 @@ export default function Home() {
                   <span className="text-5xl">⏰</span>
                   <div>
                     <p className="font-bold text-gray-800 text-lg">Orario</p>
-                    <p className="text-gray-700">17:30</p>
+                    <p className="text-gray-700">19:30</p>
                   </div>
                 </div>
               </div>
