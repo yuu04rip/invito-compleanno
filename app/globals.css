@@ -1,41 +1,179 @@
 @import "tailwindcss";
 
+/* Font + body */
+:root{
+  --bg-top: #f3edd8;       /* avorio */
+  --bg-bottom: #d3e97a;    /* verde-pastello */
+  --card: rgba(255,255,255,0.85);
+  --muted: #7a7a70;
+  --accent: #c5d86a;
+  --accent-dark: #9fb84a;
+  --shadow: 0 8px 30px rgba(20,20,20,0.08);
+  --border: rgba(0,0,0,0.06);
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(180deg, var(--bg-top) 0%, rgba(243,237,216,0.9) 40%, rgba(211,233,122,0.12) 100%);
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Gradient background used on main container (kept soft) */
 .gradient-bg {
-  background: linear-gradient(135deg, #FFB6D9 0%, #D5AAFF 25%, #A8D8FF 50%, #A8FFE5 75%, #FFD4B2 100%);
+  background: linear-gradient(135deg, #f3edd8 0%, #eaf3c2 50%, #d3e97a 100%);
   background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
+  animation: gradient 18s ease infinite;
 }
-
 @keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.balloon {
-  position: absolute;
-  border-radius: 50% 50% 50% 0;
-  filter: blur(0.5px);
-  opacity: 0.7;
+/* Card / Questionario styles */
+.question-card {
+  background: var(--card);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 18px;
 }
 
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  opacity: 0.8;
+/* Header small tabs (replica look delle immagini) */
+.event-tabs {
+  background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.event-tab {
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #222;
+  background: transparent;
+  font-weight: 600;
+}
+.event-tab.active {
+  background: rgba(0,0,0,0.06);
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.03);
+}
+
+/* Question block */
+.question-block {
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.question-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.question-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Select / input look */
+.input-card {
+  background: #f3f4ef;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,0,0,0.04);
+  color: #111827;
+}
+.input-card:focus,
+.input-card:focus-visible {
+  outline: 2px solid var(--accent);
+  box-shadow: 0 0 0 4px rgba(197,216,106,0.12);
+}
+
+/* Option list style */
+.options-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.option-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f5f7f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+.option-bullet {
+  width: 8px;
+  height: 8px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 50%;
+  flex: 0 0 8px;
+}
+.option-text {
+  flex: 1;
+  color: #222;
+}
+.option-remove {
+  background: transparent;
+  border: none;
+  color: rgba(0,0,0,0.55);
+  font-weight: 700;
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 8px;
+}
+.option-remove:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+/* Mini buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn.ghost {
+  background: transparent;
+}
+.btn.primary {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: #052200;
+  border: none;
+  box-shadow: 0 6px 18px rgba(143,157,80,0.18);
+}
+
+/* Add question / save area */
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .container { padding-left: 16px; padding-right: 16px; }
+  .question-card { padding: 14px; }
 }
