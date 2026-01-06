@@ -23,7 +23,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
               Dettagli della Festa
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date */}
               <div className="bg-gradient-to-br from-pastel-pink/30 to-pastel-pink/10 p-6 rounded-2xl border border-pastel-pink/20 hover:shadow-lg transition-all">
@@ -31,7 +31,7 @@ export default function Home() {
                   <span className="text-5xl">📅</span>
                   <div>
                     <p className="font-bold text-gray-800 text-lg">Data</p>
-                    <p className="text-gray-700">Sabato 15 Marzo 2026</p>
+                    <p className="text-gray-700">Mercoledi 6 gennaio 2026</p>
                   </div>
                 </div>
               </div>
@@ -42,7 +42,7 @@ export default function Home() {
                   <span className="text-5xl">⏰</span>
                   <div>
                     <p className="font-bold text-gray-800 text-lg">Orario</p>
-                    <p className="text-gray-700">18:00 - 23:00</p>
+                    <p className="text-gray-700">17:30</p>
                   </div>
                 </div>
               </div>
@@ -53,20 +53,20 @@ export default function Home() {
                   <span className="text-5xl">📍</span>
                   <div>
                     <p className="font-bold text-gray-800 text-lg">Luogo</p>
-                    <p className="text-gray-700">Via Roma 123, Milano, MI 20121</p>
+                    <p className="text-gray-700">
+                      <a
+                          href="https://maps.app.goo.gl/4j8A1BPkbjn1SFeN6"
+                          target="_blank"
+                          className="underline hover:text-pastel-blue"
+                      >
+                        Via Ganda 9
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
+            </div> {/* <-- chiusura corretta del grid */}
 
-            {/* Special Message */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-pastel-lavender/20 to-pastel-yellow/20 rounded-2xl border border-pastel-lavender/30">
-              <p className="text-center text-gray-700 text-lg leading-relaxed">
-                <span className="text-2xl mr-2">✨</span>
-                Non vediamo l'ora di festeggiare insieme! La tua presenza renderà questo giorno ancora più speciale.
-                <span className="text-2xl ml-2">✨</span>
-              </p>
-            </div>
           </div>
 
           {/* RSVP Form Card */}
@@ -75,9 +75,9 @@ export default function Home() {
               Conferma la tua Presenza
             </h2>
             <p className="text-center text-gray-600 mb-8">
-              Compila il modulo qui sotto per farci sapere se parteciperai! 🎈
+              Compila il quiz qui sotto per confermare la tua partecipazione 🎈
             </p>
-            
+
             <RSVPForm />
           </div>
 

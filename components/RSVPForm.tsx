@@ -1,40 +1,40 @@
 'use client';
 
-import { useState, useCallback, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-interface FormData {
+interface QuizData {
   name: string;
-  email: string;
-  attendance: string;
-  guests: string;
-  dietaryRestrictions: string;
-  message: string;
+  age: string;
+  food: string;
+  dessert: string;
 }
 
 export default function RSVPForm() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<QuizData>({
     name: '',
-    email: '',
-    attendance: '',
-    guests: '1',
-    dietaryRestrictions: '',
-    message: '',
+    age: '',
+    food: '',
+    dessert: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const showConditionalFields = formData.attendance === 'yes' || formData.attendance === 'maybe';
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!formData.name || !formData.age || !formData.food || !formData.dessert) {
+      alert('Per favore completa tutte le domande per poter inviare il modulo!');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -45,14 +45,7 @@ export default function RSVPForm() {
       });
 
       setSubmitStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        attendance: '',
-        guests: '1',
-        dietaryRestrictions: '',
-        message: '',
-      });
+      setFormData({ name: '', age: '', food: '', dessert: '' });
     } catch (error) {
       console.error('Error submitting RSVP:', error);
       setSubmitStatus('error');
@@ -62,147 +55,111 @@ export default function RSVPForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name and Email */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Nome */}
         <div>
           <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
             Nome Completo *
           </label>
           <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="input-card w-full"
-            placeholder="Mario Rossi"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-            Email *
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="input-card w-full"
-            placeholder="mario.rossi@email.com"
-          />
-        </div>
-      </div>
-
-      {/* Attendance */}
-      <div>
-        <label htmlFor="attendance" className="block text-sm font-semibold text-gray-700 mb-2">
-          Parteciperai? *
-        </label>
-        <select
-          id="attendance"
-          name="attendance"
-          value={formData.attendance}
-          onChange={handleChange}
-          required
-          className="input-card w-full"
-        >
-          <option value="">Seleziona una risposta...</option>
-          <option value="yes">✅ Sì, ci sarò!</option>
-          <option value="no">❌ No, non posso partecipare</option>
-          <option value="maybe">❓ Forse</option>
-        </select>
-      </div>
-
-      {/* Conditional fields for "yes" or "maybe" */}
-      {showConditionalFields && (
-        <>
-          {/* Number of guests */}
-          <div>
-            <label htmlFor="guests" className="block text-sm font-semibold text-gray-700 mb-2">
-              Numero di Ospiti (incluso te) *
-            </label>
-            <select
-              id="guests"
-              name="guests"
-              value={formData.guests}
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               required
               className="input-card w-full"
-            >
-              <option value="1">1 persona</option>
-              <option value="2">2 persone</option>
-              <option value="3">3 persone</option>
-              <option value="4">4 persone</option>
-              <option value="5">5+ persone</option>
-            </select>
-          </div>
-
-          {/* Dietary restrictions */}
-          <div>
-            <label htmlFor="dietaryRestrictions" className="block text-sm font-semibold text-gray-700 mb-2">
-              Restrizioni Alimentari
-            </label>
-            <input
-              type="text"
-              id="dietaryRestrictions"
-              name="dietaryRestrictions"
-              value={formData.dietaryRestrictions}
-              onChange={handleChange}
-              className="input-card w-full"
-              placeholder="Vegetariano, vegano, allergie, ecc."
-            />
-          </div>
-        </>
-      )}
-
-      {/* Message */}
-      <div>
-        <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-          Messaggio (Facoltativo)
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          value={formData.message}
-          onChange={handleChange}
-          rows={4}
-          className="input-card w-full resize-none"
-          placeholder="Lascia un messaggio di auguri o note speciali..."
-        />
-      </div>
-
-      {/* Submit button */}
-      <div className="flex justify-center">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="btn primary text-lg px-8 py-4 hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? '⏳ Invio in corso...' : '🎉 Conferma Presenza'}
-        </button>
-      </div>
-
-      {/* Status messages */}
-      {submitStatus === 'success' && (
-        <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl text-green-800 text-center shadow-lg animate-float">
-          <div className="text-4xl mb-2">🎊</div>
-          <p className="font-bold text-lg">Grazie per la conferma!</p>
-          <p className="text-sm">La tua risposta è stata registrata con successo.</p>
+              placeholder=""
+          />
         </div>
-      )}
-      
-      {submitStatus === 'error' && (
-        <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 rounded-2xl text-red-800 text-center shadow-lg">
-          <div className="text-4xl mb-2">😕</div>
-          <p className="font-bold text-lg">Ops! Qualcosa è andato storto</p>
-          <p className="text-sm">Per favore riprova tra qualche istante.</p>
+
+        {/* Età */}
+        <div>
+          <p className="font-semibold mb-2">Quanti anni compio? *</p>
+          <div className="flex flex-col gap-2">
+            {['16 (perchè li dimostro)', '22 (purtroppo)', '35 (problemi al ginocchio)', '23 (lo metto a caso'].map((age) => (
+                <label key={age} className="flex items-center gap-2">
+                  <input
+                      type="radio"
+                      name="age"
+                      value={age}
+                      checked={formData.age === age}
+                      onChange={handleChange}
+                      className="accent-pastel-pink"
+                  />
+                  {age} anni
+                </label>
+            ))}
+          </div>
         </div>
-      )}
-    </form>
+
+        {/* Cibo */}
+        <div>
+          <p className="font-semibold mb-2">Cosa vuoi mangiare? *</p>
+          <div className="flex flex-col gap-2">
+            {['Sopa de mani - halal', 'Sopa de mani - made iris', 'Sopa de mani - grrrr', 'Sopa de mani'].map((food) => (
+                <label key={food} className="flex items-center gap-2">
+                  <input
+                      type="radio"
+                      name="food"
+                      value={food}
+                      checked={formData.food === food}
+                      onChange={handleChange}
+                      className="accent-pastel-blue"
+                  />
+                  {food}
+                </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Dolce */}
+        <div>
+          <p className="font-semibold mb-2">Vuoi un dolce? *</p>
+          <div className="flex flex-col gap-2">
+            {['Sì', 'No', 'Boh'].map((dessert) => (
+                <label key={dessert} className="flex items-center gap-2">
+                  <input
+                      type="radio"
+                      name="dessert"
+                      value={dessert}
+                      checked={formData.dessert === dessert}
+                      onChange={handleChange}
+                      className="accent-pastel-yellow"
+                  />
+                  {dessert}
+                </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Submit button */}
+        <div className="flex justify-center">
+          <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn primary text-lg px-8 py-4 hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? '⏳ Invio in corso...' : '🎉 Invia Risposte'}
+          </button>
+        </div>
+
+        {/* Status messages */}
+        {submitStatus === 'success' && (
+            <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl text-green-800 text-center shadow-lg animate-float">
+              <div className="text-4xl mb-2">🎊</div>
+              <p className="font-bold text-lg">Grazie per le tue risposte!</p>
+              <p className="text-sm">La tua registrazione è stata completata con successo.</p>
+            </div>
+        )}
+
+        {submitStatus === 'error' && (
+            <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 rounded-2xl text-red-800 text-center shadow-lg">
+              <div className="text-4xl mb-2">😕</div>
+              <p className="font-bold text-lg">Ops! Qualcosa è andato storto</p>
+              <p className="text-sm">Per favore riprova tra qualche istante.</p>
+            </div>
+        )}
+      </form>
   );
 }
