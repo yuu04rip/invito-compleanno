@@ -101,7 +101,7 @@ export default function RSVPForm() {
           <div>
             <p className="font-semibold mb-2">Quanti anni compio? *</p>
             <div className="flex flex-col gap-2">
-              {['16 (perchè li dimostro)', '22 (purtroppo)', '35 (problemi al ginocchio)', '23 (lo metto a caso'].map((age) => (
+              {['16 (perchè li dimostro)', '22 (purtroppo)', '35 (problemi al ginocchio)', '23 (lo metto a caso)'].map((age) => (
                   <label key={age} className="flex items-center gap-2">
                     <input
                         type="radio"
