@@ -1,69 +1,37 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useCallback, FormEvent } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-type Option = { id: string; text: string };
+interface FormData {
+  name: string;
+  email: string;
+  attendance: string;
+  guests: string;
+  dietaryRestrictions: string;
+  message: string;
+}
 
 export default function RSVPForm() {
-  // Mantengo il form base ma lo presento come blocchi domanda/opzioni
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    attendance: '',
+    guests: '1',
+    dietaryRestrictions: '',
+    message: '',
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  // Stato demo del questionario (puoi invece caricarlo da DB)
-  const [questions, setQuestions] = useState([
-    {
-      id: 'q-1',
-      type: 'multiple', // multiple | text
-      required: true,
-      text: 'Cosa vuoi mangiare?',
-      options: [
-        { id: 'o-1', text: 'Sopa de mani - halal' },
-        { id: 'o-2', text: 'Sopa de mani - made Iris' },
-        { id: 'o-3', text: 'Sopa de mani - grrrr' },
-      ] as Option[],
-    },
-    {
-      id: 'q-2',
-      type: 'multiple',
-      required: false,
-      text: 'Vuoi un dolce',
-      options: [
-        { id: 'o-4', text: 'Si' },
-        { id: 'o-5', text: 'No' },
-        { id: 'o-6', text: 'Boh' },
-      ] as Option[],
-    },
-  ]);
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const addOption = (qId: string) => {
-    setQuestions((prev) =>
-        prev.map((q) =>
-            q.id === qId
-                ? { ...q, options: [...q.options, { id: `${qId}-o-${Date.now()}`, text: 'Nuova opzione' }] }
-                : q
-        )
-    );
-  };
-
-  const removeOption = (qId: string, optionId: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === qId ? { ...q, options: q.options.filter((o) => o.id !== optionId) } : q)));
-  };
-
-  const updateOptionText = (qId: string, optionId: string, value: string) => {
-    setQuestions((prev) =>
-        prev.map((q) =>
-            q.id === qId ? { ...q, options: q.options.map((o) => (o.id === optionId ? { ...o, text: value } : o)) } : q
-        )
-    );
-  };
-
-  const toggleRequired = (qId: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === qId ? { ...q, required: !q.required } : q)));
-  };
+  const showConditionalFields = formData.attendance === 'yes' || formData.attendance === 'maybe';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -72,15 +40,19 @@ export default function RSVPForm() {
 
     try {
       await addDoc(collection(db, 'rsvps'), {
-        name,
-        email,
+        ...formData,
         submittedAt: serverTimestamp(),
-        answers: [], // integra le risposte se le raccogli
       });
 
       setSubmitStatus('success');
-      setName('');
-      setEmail('');
+      setFormData({
+        name: '',
+        email: '',
+        attendance: '',
+        guests: '1',
+        dietaryRestrictions: '',
+        message: '',
+      });
     } catch (error) {
       console.error('Error submitting RSVP:', error);
       setSubmitStatus('error');
@@ -90,137 +62,147 @@ export default function RSVPForm() {
   };
 
   return (
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Parte anagrafica semplice */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-              className="input-card"
-              placeholder="Nome completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-          />
-          <input
-              className="input-card"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-          />
-        </div>
-
-        {/* Questionario builder style */}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Name and Email */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          {questions.map((q) => (
-              <div key={q.id} className="question-block">
-                <div className="question-header">
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <select
-                        className="input-card"
-                        value={q.type}
-                        onChange={(e) =>
-                            setQuestions((prev) => prev.map((qq) => (qq.id === q.id ? { ...qq, type: e.target.value } : qq)))
-                        }
-                    >
-                      <option value="multiple">Risposta multipla</option>
-                      <option value="text">Risposta aperta</option>
-                    </select>
-
-                    <label className="flex items-center gap-2 text-sm text-gray-700">
-                      <input type="checkbox" checked={q.required} onChange={() => toggleRequired(q.id)} />
-                      <span>Necessario</span>
-                    </label>
-                  </div>
-
-                  <button
-                      type="button"
-                      className="option-remove"
-                      onClick={() => setQuestions((prev) => prev.filter((qq) => qq.id !== q.id))}
-                      title="Rimuovi domanda"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Testo domanda */}
-                <textarea
-                    className="input-card w-full"
-                    rows={2}
-                    value={q.text}
-                    onChange={(e) => setQuestions((prev) => prev.map((qq) => (qq.id === q.id ? { ...qq, text: e.target.value } : qq)))}
-                />
-
-                {/* Opzioni (se multiple) */}
-                {q.type === 'multiple' && (
-                    <>
-                      <div className="options-list">
-                        {q.options.map((opt) => (
-                            <div key={opt.id} className="option-item">
-                              <div className="option-bullet" />
-                              <input
-                                  className="option-text bg-transparent border-0 focus:outline-none"
-                                  value={opt.text}
-                                  onChange={(e) => updateOptionText(q.id, opt.id, e.target.value)}
-                              />
-                              <button type="button" aria-label="Rimuovi opzione" className="option-remove" onClick={() => removeOption(q.id, opt.id)}>
-                                ✕
-                              </button>
-                            </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-3">
-                        <button type="button" className="btn ghost" onClick={() => addOption(q.id)}>
-                          + Nuova opzione
-                        </button>
-                      </div>
-                    </>
-                )}
-              </div>
-          ))}
+          <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+            Nome Completo *
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="input-card w-full"
+            placeholder="Mario Rossi"
+          />
         </div>
 
-        {/* Aggiungi domanda / submit */}
-        <div className="form-footer">
-          <div className="flex items-center gap-3">
-            <button
-                type="button"
-                className="btn"
-                onClick={() =>
-                    setQuestions((prev) => [
-                      ...prev,
-                      {
-                        id: `q-${Date.now()}`,
-                        type: 'multiple',
-                        required: false,
-                        text: 'Nuova domanda',
-                        options: [{ id: `o-${Date.now()}`, text: 'Nuova opzione' }],
-                      },
-                    ])
-                }
+        <div>
+          <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            Email *
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="input-card w-full"
+            placeholder="mario.rossi@email.com"
+          />
+        </div>
+      </div>
+
+      {/* Attendance */}
+      <div>
+        <label htmlFor="attendance" className="block text-sm font-semibold text-gray-700 mb-2">
+          Parteciperai? *
+        </label>
+        <select
+          id="attendance"
+          name="attendance"
+          value={formData.attendance}
+          onChange={handleChange}
+          required
+          className="input-card w-full"
+        >
+          <option value="">Seleziona una risposta...</option>
+          <option value="yes">✅ Sì, ci sarò!</option>
+          <option value="no">❌ No, non posso partecipare</option>
+          <option value="maybe">❓ Forse</option>
+        </select>
+      </div>
+
+      {/* Conditional fields for "yes" or "maybe" */}
+      {showConditionalFields && (
+        <>
+          {/* Number of guests */}
+          <div>
+            <label htmlFor="guests" className="block text-sm font-semibold text-gray-700 mb-2">
+              Numero di Ospiti (incluso te) *
+            </label>
+            <select
+              id="guests"
+              name="guests"
+              value={formData.guests}
+              onChange={handleChange}
+              required
+              className="input-card w-full"
             >
-              + Aggiungi domanda
-            </button>
-            <div className="text-sm text-gray-600">Le modifiche qui sono a scopo dimostrativo — salva su DB se necessario</div>
+              <option value="1">1 persona</option>
+              <option value="2">2 persone</option>
+              <option value="3">3 persone</option>
+              <option value="4">4 persone</option>
+              <option value="5">5+ persone</option>
+            </select>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button type="submit" disabled={isSubmitting} className="btn primary">
-              {isSubmitting ? 'Invio...' : 'Get on the list'}
-            </button>
+          {/* Dietary restrictions */}
+          <div>
+            <label htmlFor="dietaryRestrictions" className="block text-sm font-semibold text-gray-700 mb-2">
+              Restrizioni Alimentari
+            </label>
+            <input
+              type="text"
+              id="dietaryRestrictions"
+              name="dietaryRestrictions"
+              value={formData.dietaryRestrictions}
+              onChange={handleChange}
+              className="input-card w-full"
+              placeholder="Vegetariano, vegano, allergie, ecc."
+            />
           </div>
+        </>
+      )}
+
+      {/* Message */}
+      <div>
+        <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+          Messaggio (Facoltativo)
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
+          rows={4}
+          className="input-card w-full resize-none"
+          placeholder="Lascia un messaggio di auguri o note speciali..."
+        />
+      </div>
+
+      {/* Submit button */}
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn primary text-lg px-8 py-4 hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? '⏳ Invio in corso...' : '🎉 Conferma Presenza'}
+        </button>
+      </div>
+
+      {/* Status messages */}
+      {submitStatus === 'success' && (
+        <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl text-green-800 text-center shadow-lg animate-float">
+          <div className="text-4xl mb-2">🎊</div>
+          <p className="font-bold text-lg">Grazie per la conferma!</p>
+          <p className="text-sm">La tua risposta è stata registrata con successo.</p>
         </div>
-
-        {submitStatus === 'success' && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-center">
-              ✨ Grazie! La tua risposta è stata registrata.
-            </div>
-        )}
-        {submitStatus === 'error' && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
-              ❌ Si è verificato un errore — riprova.
-            </div>
-        )}
-      </form>
+      )}
+      
+      {submitStatus === 'error' && (
+        <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 rounded-2xl text-red-800 text-center shadow-lg">
+          <div className="text-4xl mb-2">😕</div>
+          <p className="font-bold text-lg">Ops! Qualcosa è andato storto</p>
+          <p className="text-sm">Per favore riprova tra qualche istante.</p>
+        </div>
+      )}
+    </form>
   );
 }
