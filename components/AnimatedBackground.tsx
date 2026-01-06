@@ -22,19 +22,32 @@ export default function AnimatedBackground() {
       color: string;
       speed: number;
       angle: number;
+      swingAngle: number;
     }> = [];
 
-    const colors = ['#FFB6D9', '#D5AAFF', '#A8D8FF', '#A8FFE5', '#FFD4B2', '#E7C6FF', '#FFF8B8'];
+    // Enhanced birthday color palette
+    const colors = [
+      '#FFB6D9', // pink
+      '#D5AAFF', // purple
+      '#A8D8FF', // blue
+      '#A8FFE5', // mint
+      '#FFD4B2', // peach
+      '#E7C6FF', // lavender
+      '#FFF8B8', // yellow
+      '#FF9CEE', // magenta
+      '#B4E7CE', // seafoam
+    ];
 
-    // Create balloons
-    for (let i = 0; i < 15; i++) {
+    // Create more balloons for a festive atmosphere
+    for (let i = 0; i < 20; i++) {
       balloons.push({
         x: Math.random() * canvas.width,
-        y: canvas.height + Math.random() * 200,
-        radius: 20 + Math.random() * 30,
+        y: canvas.height + Math.random() * 300,
+        radius: 25 + Math.random() * 35,
         color: colors[Math.floor(Math.random() * colors.length)],
-        speed: 0.3 + Math.random() * 0.5,
+        speed: 0.4 + Math.random() * 0.6,
         angle: Math.random() * Math.PI * 2,
+        swingAngle: Math.random() * Math.PI * 2,
       });
     }
 
@@ -45,17 +58,21 @@ export default function AnimatedBackground() {
       color: string;
       speed: number;
       rotationSpeed: number;
+      size: number;
+      shape: 'rect' | 'circle';
     }> = [];
 
-    // Create confetti
-    for (let i = 0; i < 30; i++) {
+    // Create more confetti pieces
+    for (let i = 0; i < 50; i++) {
       confetti.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         rotation: Math.random() * 360,
         color: colors[Math.floor(Math.random() * colors.length)],
-        speed: 0.5 + Math.random() * 1,
-        rotationSpeed: (Math.random() - 0.5) * 2,
+        speed: 0.5 + Math.random() * 1.5,
+        rotationSpeed: (Math.random() - 0.5) * 3,
+        size: 4 + Math.random() * 6,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle',
       });
     }
 
@@ -65,25 +82,35 @@ export default function AnimatedBackground() {
       ctx.save();
       ctx.translate(balloon.x, balloon.y);
       
-      // Balloon body
+      // Balloon body with gradient
+      const gradient = ctx.createRadialGradient(-balloon.radius / 4, -balloon.radius / 4, 0, 0, 0, balloon.radius);
+      gradient.addColorStop(0, balloon.color);
+      gradient.addColorStop(1, balloon.color + 'CC'); // Add some transparency at edges
+      
       ctx.beginPath();
       ctx.arc(0, 0, balloon.radius, 0, Math.PI * 2);
-      ctx.fillStyle = balloon.color;
+      ctx.fillStyle = gradient;
       ctx.fill();
       
-      // Highlight
+      // Highlight for shine effect
       ctx.beginPath();
-      ctx.arc(-balloon.radius / 3, -balloon.radius / 3, balloon.radius / 4, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.arc(-balloon.radius / 3, -balloon.radius / 3, balloon.radius / 3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
       ctx.fill();
       
-      // String
+      // String with slight curve
       ctx.beginPath();
       ctx.moveTo(0, balloon.radius);
-      ctx.lineTo(0, balloon.radius + 40);
-      ctx.strokeStyle = balloon.color;
-      ctx.lineWidth = 1;
+      ctx.quadraticCurveTo(5, balloon.radius + 25, 0, balloon.radius + 50);
+      ctx.strokeStyle = balloon.color + 'DD';
+      ctx.lineWidth = 2;
       ctx.stroke();
+      
+      // Small knot at the bottom of balloon
+      ctx.beginPath();
+      ctx.arc(0, balloon.radius, 3, 0, Math.PI * 2);
+      ctx.fillStyle = balloon.color;
+      ctx.fill();
       
       ctx.restore();
     }
@@ -94,8 +121,17 @@ export default function AnimatedBackground() {
       ctx.save();
       ctx.translate(conf.x, conf.y);
       ctx.rotate((conf.rotation * Math.PI) / 180);
+      
       ctx.fillStyle = conf.color;
-      ctx.fillRect(-3, -6, 6, 12);
+      
+      if (conf.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, conf.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-conf.size / 2, -conf.size * 1.5 / 2, conf.size, conf.size * 1.5);
+      }
+      
       ctx.restore();
     }
 
@@ -107,11 +143,11 @@ export default function AnimatedBackground() {
       // Update and draw balloons
       balloons.forEach((balloon) => {
         balloon.y -= balloon.speed;
-        balloon.x += Math.sin(balloon.angle) * 0.5;
-        balloon.angle += 0.01;
+        balloon.swingAngle += 0.02;
+        balloon.x += Math.sin(balloon.swingAngle) * 0.8;
 
-        if (balloon.y < -balloon.radius - 50) {
-          balloon.y = canvas.height + balloon.radius;
+        if (balloon.y < -balloon.radius - 60) {
+          balloon.y = canvas.height + balloon.radius + Math.random() * 100;
           balloon.x = Math.random() * canvas.width;
         }
 
@@ -122,9 +158,10 @@ export default function AnimatedBackground() {
       confetti.forEach((conf) => {
         conf.y += conf.speed;
         conf.rotation += conf.rotationSpeed;
+        conf.x += Math.sin(conf.y / 50) * 0.5;
 
-        if (conf.y > canvas.height) {
-          conf.y = -10;
+        if (conf.y > canvas.height + 20) {
+          conf.y = -20;
           conf.x = Math.random() * canvas.width;
         }
 
@@ -151,7 +188,8 @@ export default function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10 opacity-50"
+      className="fixed top-0 left-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 0, opacity: 0.6 }}
     />
   );
 }
